@@ -77,8 +77,24 @@
     }
 
     .tip {
-      font-size: 0.95em;
+      font-size: 0.9em;
       color: #444;
+    }
+
+    .next-button {
+      display: block;
+      margin: 2em auto 0;
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .next-button:hover {
+      opacity: 0.85;
     }
 
     hr {
@@ -103,6 +119,7 @@
   <div class="feedback" id="feedback"></div>
   <div class="joke" id="joke"></div>
   <div class="tip" id="tip"></div>
+  <button class="next-button" id="nextBtn" style="display:none;">Next Question</button>
 
   <script>
     const darkToggle = document.getElementById('darkToggle');
@@ -129,16 +146,20 @@
     ];
 
     const tips = [
-      "Tip: When multiplying powers of 10, add the exponents. When dividing, subtract them!",
-      "Tip: Convert decimals like 0.004 into scientific notation first to simplify multiplication.",
-      "Tip: Estimate! You can quickly eliminate unrealistic answers before calculating.",
-      "Tip: Keep 2–3 significant digits in mind when rounding — avoid over-rounding early!",
-      "Tip: A number like 3.2×10^-4 is just 0.00032 — shift the decimal 4 places left.",
-      "Tip: Use base ×10^exp form to multiply easier — base math first, then deal with exponents."
+      "When multiplying scientific notation, multiply the numbers and add the exponents.",
+      "When dividing scientific notation, divide the numbers and subtract the exponents.",
+      "Convert decimals to scientific notation if one number is too small or too large.",
+      "To estimate quickly, round each number to 1 significant figure.",
+      "Always line up the base (10) when simplifying powers.",
+      "Double check your exponent math—it's easy to miss a + or -."
     ];
 
-    function getRandom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
+    function getRandomJoke() {
+      return jokes[Math.floor(Math.random() * jokes.length)];
+    }
+
+    function getRandomTip() {
+      return tips[Math.floor(Math.random() * tips.length)];
     }
 
     function getTodayString() {
@@ -188,8 +209,10 @@
     function renderProblem() {
       currentProblem = generateUniqueProblem();
       document.getElementById('problem').textContent = currentProblem.problemText;
+      document.getElementById('feedback').textContent = '';
       document.getElementById('joke').textContent = '';
       document.getElementById('tip').textContent = '';
+      document.getElementById('nextBtn').style.display = 'none';
       const choices = generateChoices(currentProblem.answer);
       const container = document.getElementById('choices');
       container.innerHTML = '';
@@ -205,8 +228,9 @@
     function checkAnswer(selected) {
       const isCorrect = Math.abs(selected - currentProblem.answer) < 0.00001;
       document.getElementById('feedback').textContent = isCorrect ? "✅ Correct!" : `❌ Try again. Answer was ${currentProblem.answer}`;
-      document.getElementById('joke').textContent = getRandom(jokes);
-      document.getElementById('tip').textContent = getRandom(tips);
+      document.getElementById('joke').textContent = getRandomJoke();
+      document.getElementById('tip').textContent = `💡 Tip: ${getRandomTip()}`;
+      document.getElementById('nextBtn').style.display = 'block';
       const today = getTodayString();
       const pastProblems = JSON.parse(localStorage.getItem('pastProblems') || '[]');
       pastProblems.push(currentProblem.problemText);
@@ -216,7 +240,6 @@
       log[today].push(isCorrect);
       localStorage.setItem('log', JSON.stringify(log));
       updateStats();
-      setTimeout(renderProblem, 2000);
     }
 
     function updateStats() {
@@ -253,6 +276,7 @@
       document.getElementById('stats').textContent = `✅ Overall Accuracy: ${Math.round(100 * correct / Math.max(total, 1))}% | Last 7 Days: ${Math.round(100 * last7Correct / Math.max(last7Total, 1))}%`;
     }
 
+    document.getElementById('nextBtn').addEventListener('click', renderProblem);
     renderProblem();
     updateStats();
   </script>
